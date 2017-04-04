@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  * This thread class will turn the phone into a server and listen for any connections
@@ -24,6 +25,8 @@ public class BoxBlueAcceptThread extends Thread {
         BluetoothServerSocket tmp = null;
         try {
             // MY_UUID is the app's UUID string, also used by the client code.
+            String NAME = "test_phone";
+            UUID MY_UUID = new UUID(123,123);
             tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
         } catch (IOException e) {
             Log.e(TAG, "Socket's listen() method failed", e);
@@ -62,6 +65,6 @@ public class BoxBlueAcceptThread extends Thread {
     }
 
     private void manageMyConnectedSocket() {
-        return null;
+        return;
     }
 }

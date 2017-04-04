@@ -28,10 +28,11 @@ public class BoxBlueDataTransfer {
     private Handler mHandler; // handler that gets info from Bluetooth service
     private static final String TAG = "BoxBlueDataTransfer";
 
-    public BoxBlueDataTransfer(BluetoothSocket socket) {
+    public BoxBlueDataTransfer(BluetoothSocket socket, Handler handler) {
         mmSocket = socket;
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
+        mHandler = handler;
 
         // Get the input and output streams; using temp objects because
         // member streams are final.

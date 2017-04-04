@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BoxBlue</string>
+    <string name="search_button">Search key</string>
 </resources>

@@ -3,22 +3,28 @@ package com.boxblue.android.boxblue;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
 import com.boxblue.android.boxblue.connection.BoxBlueClientThread;
+import com.boxblue.android.boxblue.constants.BoxBlueDataTransferType;
+import com.boxblue.android.boxblue.data_transfer.BoxBlueDataTransfer;
 import com.boxblue.android.boxblue.exception.BoxBlueDeviceNotFoundException;
+import com.boxblue.android.boxblue.tester_app.MainActivity;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class BoxBlue {
-    BluetoothAdapter mmBluetoothAdapter;
-    BluetoothDevice mmDevice;
+    private BluetoothAdapter mmBluetoothAdapter;
+    private BluetoothDevice mmDevice;
+    private Handler mmHandler;
     public static final String TAG = "BoxBlue";
 
     private Set<BluetoothDevice> getSetOfPairedDevices() {
@@ -48,20 +54,9 @@ public class BoxBlue {
         return pairedBoxBlueDevices;
     }
 
-    public BoxBlue instantiateBoxBlue() throws BoxBlueDeviceNotFoundException {
-        mmBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mmBluetoothAdapter == null) {
-            // Device does not support Bluetooth
-            return null;
-        }
-
-        // Enable Bluetooth
-        // TODO: This should be in the Activity, not the library
-        if (!mmBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
-
+    public BoxBlue(BluetoothAdapter bluetoothAdapter, Handler handler) throws BoxBlueDeviceNotFoundException {
+        mmBluetoothAdapter = bluetoothAdapter;
+        mmHandler = handler;
 
         Set<BluetoothDevice> pairedBoxBlueDevices = getSetOfPairedBoxBlueDevices();
 
@@ -76,10 +71,30 @@ public class BoxBlue {
         }
     }
 
-    public boolean search(int[] array, int key) {
-        // 
-        BoxBlueClientThread boxBlueClientThread = new BoxBlueClientThread();
-        return true;
+    public void search(int[] array, int key) {
+
+        // organize byte array as such:
+        // first 4 bytes (int): BocBlueDataTransferType.SEARCH
+        // second 4 bytes (int): key
+        // remaining bytes is the int array
+        ByteBuffer b = ByteBuffer.allocate(array.length);
+
+        b.putInt(BoxBlueDataTransferType.SEARCH.getTransferTypeId());
+        b.putInt(key);
+        for (int i = 0; i < array.length; i++)
+            b.putInt(array[i]);
+
+        byte[] bytes = b.array();
+
+        //
+        BoxBlueClientThread boxBlueClientThread = new BoxBlueClientThread(mmDevice,
+                BoxBlueDataTransferType.SEARCH,
+                bytes,
+                mmHandler,
+                mmBluetoothAdapter);
+
+        // start thread which connects to boxblue and sends the data then reads the data
+        boxBlueClientThread.start();
     }
 
     public int[] sort(int[] array) {

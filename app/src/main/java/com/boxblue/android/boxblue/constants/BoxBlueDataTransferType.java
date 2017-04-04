@@ -5,5 +5,18 @@ package com.boxblue.android.boxblue.constants;
  */
 
 public enum BoxBlueDataTransferType {
-    SEARCH, SORT, TRANSFER_DATA, RECEIVE_DATA;
+    SEARCH          (0),
+    SORT            (1),
+    TRANSFER_DATA   (2),
+    RECEIVE_DATA    (3);
+
+    private final int transferTypeId;
+
+    BoxBlueDataTransferType(int transferTypeId) {
+        this.transferTypeId = transferTypeId;
+    }
+
+    public int getTransferTypeId() {
+        return transferTypeId;
+    }
 }

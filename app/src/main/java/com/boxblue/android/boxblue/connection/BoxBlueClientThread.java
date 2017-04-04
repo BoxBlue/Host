@@ -3,12 +3,14 @@ package com.boxblue.android.boxblue.connection;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.Handler;
 import android.util.Log;
 
 import com.boxblue.android.boxblue.constants.BoxBlueDataTransferType;
 import com.boxblue.android.boxblue.data_transfer.BoxBlueDataTransfer;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import static android.content.ContentValues.TAG;
 
@@ -26,12 +28,16 @@ import static android.content.ContentValues.TAG;
 public class BoxBlueClientThread extends Thread {
     private final BluetoothSocket mmSocket;
     private final BluetoothDevice mmDevice;
+    private final Handler mmHandler;
     private final BoxBlueDataTransferType mmDataTransferType;
+    private final BluetoothAdapter mmBluetoothAdapter;
     private final byte[] mmBytesToTransfer;
 
     public BoxBlueClientThread(BluetoothDevice device,
                                BoxBlueDataTransferType boxBlueDataTransferType,
-                               byte[] bytesToTransfer) {
+                               byte[] bytesToTransfer,
+                               Handler handler,
+                               BluetoothAdapter bluetoothAdapter) {
         // Use a temporary object that is later assigned to mmSocket
         // because mmSocket is final.
         BluetoothSocket tmp = null;
@@ -41,9 +47,15 @@ public class BoxBlueClientThread extends Thread {
 
         mmBytesToTransfer = bytesToTransfer;
 
+        mmHandler = handler;
+
+        mmBluetoothAdapter = bluetoothAdapter;
+
         try {
             // Get a BluetoothSocket to connect with the given BluetoothDevice.
             // MY_UUID is the app's UUID string, also used in the server code.
+
+            UUID MY_UUID = new UUID(123, 123);
             tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
         } catch (IOException e) {
             Log.e(TAG, "Socket's create() method failed", e);
@@ -51,9 +63,9 @@ public class BoxBlueClientThread extends Thread {
         mmSocket = tmp;
     }
 
-    public void run(BluetoothAdapter mBluetoothAdapter) {
+    public void run() {
         // Cancel discovery because it otherwise slows down the connection.
-        mBluetoothAdapter.cancelDiscovery();
+        mmBluetoothAdapter.cancelDiscovery();
 
         try {
             // Connect to the remote device through the socket. This call blocks
@@ -81,7 +93,7 @@ public class BoxBlueClientThread extends Thread {
 
     // Manage the connected socket by transfering data based off the data transfer type
     private void manageMyConnectedSocket() {
-        BoxBlueDataTransfer boxBlueDataTransfer = new BoxBlueDataTransfer(mmSocket);
+        BoxBlueDataTransfer boxBlueDataTransfer = new BoxBlueDataTransfer(mmSocket, mmHandler);
 
         switch (mmDataTransferType) {
             case SEARCH:
