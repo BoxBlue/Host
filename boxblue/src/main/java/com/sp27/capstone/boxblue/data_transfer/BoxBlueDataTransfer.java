@@ -1,4 +1,4 @@
-package com.boxblue.android.boxblue.data_transfer;
+package com.sp27.capstone.boxblue.data_transfer;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.boxblue.android.boxblue.constants.BoxBlueMessageConstants;
+import com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants;
 
 import java.io.IOException;
 import java.io.InputStream;

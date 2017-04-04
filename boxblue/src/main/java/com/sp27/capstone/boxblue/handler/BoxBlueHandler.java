@@ -1,15 +1,13 @@
-package com.boxblue.android.boxblue.handler;
+package com.sp27.capstone.boxblue.handler;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
-import com.boxblue.android.boxblue.R;
-
-import static com.boxblue.android.boxblue.constants.BoxBlueMessageConstants.MESSAGE_READ;
-import static com.boxblue.android.boxblue.constants.BoxBlueMessageConstants.MESSAGE_TOAST;
-import static com.boxblue.android.boxblue.constants.BoxBlueMessageConstants.MESSAGE_WRITE;
+import static com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants.MESSAGE_READ;
+import static com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants.MESSAGE_TOAST;
+import static com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants.MESSAGE_WRITE;
 
 /**
  * Created by crejaud on 4/4/17.

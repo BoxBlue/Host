@@ -1,4 +1,4 @@
-package com.boxblue.android.boxblue.connection;
+package com.sp27.capstone.boxblue.connection;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -6,8 +6,8 @@ import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.util.Log;
 
-import com.boxblue.android.boxblue.constants.BoxBlueDataTransferType;
-import com.boxblue.android.boxblue.data_transfer.BoxBlueDataTransfer;
+import com.sp27.capstone.boxblue.constants.BoxBlueDataTransferType;
+import com.sp27.capstone.boxblue.data_transfer.BoxBlueDataTransfer;
 
 import java.io.IOException;
 import java.util.UUID;

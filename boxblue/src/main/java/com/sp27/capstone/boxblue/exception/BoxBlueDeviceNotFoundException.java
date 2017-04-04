@@ -1,4 +1,4 @@
-package com.boxblue.android.boxblue.exception;
+package com.sp27.capstone.boxblue.exception;
 
 /**
  * Created by crejaud on 4/1/17.

@@ -1,4 +1,4 @@
-package com.boxblue.android.boxblue.connection;
+package com.sp27.capstone.boxblue.connection;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;

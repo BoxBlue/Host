@@ -1,4 +1,4 @@
-package com.boxblue.android.boxblue.constants;
+package com.sp27.capstone.boxblue.constants;
 
 /**
  * Created by crejaud on 4/1/17.

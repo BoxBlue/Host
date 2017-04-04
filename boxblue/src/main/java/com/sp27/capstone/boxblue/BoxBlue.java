@@ -1,24 +1,17 @@
-package com.boxblue.android.boxblue;
+package com.sp27.capstone.boxblue;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.ParcelUuid;
-import android.os.Parcelable;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
-import com.boxblue.android.boxblue.connection.BoxBlueClientThread;
-import com.boxblue.android.boxblue.constants.BoxBlueDataTransferType;
-import com.boxblue.android.boxblue.data_transfer.BoxBlueDataTransfer;
-import com.boxblue.android.boxblue.exception.BoxBlueDeviceNotFoundException;
-import com.boxblue.android.boxblue.tester_app.MainActivity;
+import com.sp27.capstone.boxblue.connection.BoxBlueClientThread;
+import com.sp27.capstone.boxblue.constants.BoxBlueDataTransferType;
+import com.sp27.capstone.boxblue.exception.BoxBlueDeviceNotFoundException;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class BoxBlue {
