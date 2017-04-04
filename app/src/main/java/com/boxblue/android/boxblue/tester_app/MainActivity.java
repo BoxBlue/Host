@@ -3,17 +3,16 @@ package com.boxblue.android.boxblue.tester_app;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.boxblue.android.boxblue.BoxBlue;
 import com.boxblue.android.boxblue.R;
-import com.boxblue.android.boxblue.exception.BoxBlueDeviceNotFoundException;
-import com.boxblue.android.boxblue.handler.BoxBlueHandler;
+import com.sp27.capstone.boxblue.BoxBlue;
+import com.sp27.capstone.boxblue.exception.BoxBlueDeviceNotFoundException;
+import com.sp27.capstone.boxblue.handler.BoxBlueHandler;
 
 public class MainActivity extends AppCompatActivity {
 
