@@ -75,6 +75,7 @@ public class BoxBlueDataTransfer {
     public void write(byte[] bytes) {
         try {
             mmOutStream.write(bytes);
+            mmOutStream.flush();
 
             // Share the sent message with the UI activity.
             Message writtenMsg = mHandler.obtainMessage(

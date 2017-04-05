@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BoxBlue</string>
+
+    <integer name="magic">0xFA</integer>
 </resources>

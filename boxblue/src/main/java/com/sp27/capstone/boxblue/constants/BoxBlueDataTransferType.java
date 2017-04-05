@@ -16,7 +16,7 @@ public enum BoxBlueDataTransferType {
         this.transferTypeId = transferTypeId;
     }
 
-    public int getTransferTypeId() {
-        return transferTypeId;
+    public byte getTransferTypeId() {
+        return (byte) transferTypeId;
     }
 }

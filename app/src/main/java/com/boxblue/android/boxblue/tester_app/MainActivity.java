@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int arr_size = 100000;
     private int[] arr = new int[arr_size];
-    private int key = 2;
+    private int key = 0;
 
     private Button searchButton;
 
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         // populate array with random numbers
         for (int i = 0; i < arr_size; i++)
-            arr[i] = (int) (Math.random() * 100);
+            arr[i] = i;
 
 
         searchButton.setOnClickListener(new View.OnClickListener() {
