@@ -51,15 +51,33 @@ public class BoxBlueClientThread extends Thread {
 
         mmBluetoothAdapter = bluetoothAdapter;
 
-        try {
-            // Get a BluetoothSocket to connect with the given BluetoothDevice.
-            // MY_UUID is the app's UUID string, also used in the server code.
+        // Default UUID
+        UUID DEFAULT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
-            UUID MY_UUID = new UUID(123, 123);
-            tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
-        } catch (IOException e) {
+        try {
+            // Use the UUID of the device that discovered // TODO Maybe need extra device object
+            if (mmDevice != null)
+            {
+                Log.i(TAG, "Device Name: " + mmDevice.getName());
+                Log.i(TAG, "Device UUID: " + mmDevice.getUuids()[0].getUuid());
+                tmp = mmDevice.createRfcommSocketToServiceRecord(mmDevice.getUuids()[0].getUuid());
+
+            }
+            else Log.d(TAG, "Device is null.");
+        }
+        catch (NullPointerException e)
+        {
+            Log.d(TAG, " UUID from device is null, Using Default UUID, Device name: " + device.getName());
+            try {
+                tmp = mmDevice.createRfcommSocketToServiceRecord(DEFAULT_UUID);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
+        catch (IOException e) {
             Log.e(TAG, "Socket's create() method failed", e);
         }
+
         mmSocket = tmp;
     }
 
@@ -70,9 +88,17 @@ public class BoxBlueClientThread extends Thread {
         try {
             // Connect to the remote device through the socket. This call blocks
             // until it succeeds or throws an exception.
-            mmSocket.connect();
+            Log.d(TAG, "trying to connect to RPI");
+            if (mmDevice.createBond()) {
+                Log.d(TAG, "Bonded");
+                mmSocket.connect();
+                Log.d(TAG, "connected to RPI");
+            } else {
+                Log.d(TAG, "Could not bond");
+            }
         } catch (IOException connectException) {
             // Unable to connect; close the socket and return.
+            Log.d(TAG, "unable to connect! Message: " + connectException.getLocalizedMessage());
             cancel();
             return;
         }
@@ -93,10 +119,12 @@ public class BoxBlueClientThread extends Thread {
 
     // Manage the connected socket by transfering data based off the data transfer type
     private void manageMyConnectedSocket() {
+        Log.d(TAG, "Managing my connected socket");
         BoxBlueDataTransfer boxBlueDataTransfer = new BoxBlueDataTransfer(mmSocket, mmHandler);
 
         switch (mmDataTransferType) {
             case SEARCH:
+                Log.d(TAG, "Going to start write then read for search");
                 writeThenRead(boxBlueDataTransfer);
                 break;
             case SORT:
@@ -117,7 +145,9 @@ public class BoxBlueClientThread extends Thread {
     // Helper functions for managing connected socket
     private void writeThenRead(BoxBlueDataTransfer boxBlueDataTransfer) {
         write(boxBlueDataTransfer);
+        Log.d(TAG, "Post writing");
         read(boxBlueDataTransfer);
+        Log.d(TAG, "Post reading");
     }
 
     private void read(BoxBlueDataTransfer boxBlueDataTransfer) {

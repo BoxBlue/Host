@@ -2,6 +2,9 @@ package com.sp27.capstone.boxblue;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
@@ -24,6 +27,12 @@ public class BoxBlue {
     private Handler mmHandler;
     public static final String TAG = "BoxBlue";
 
+    private final Set<String> rpiHardwareAddress = new HashSet<>();
+
+    private void addRpiMacIds() {
+        rpiHardwareAddress.add("B8:27:EB:9B:8B:74");
+    }
+
     private Set<BluetoothDevice> getSetOfPairedDevices() {
         return mmBluetoothAdapter.getBondedDevices();
     }
@@ -37,10 +46,10 @@ public class BoxBlue {
 
             Log.d(TAG, deviceName + " " + deviceHardwareAddress);
 
-            // Getting uuids of the device
-            ParcelUuid[] uuids = device.getUuids();
-
-            pairedBoxBlueDevices.add(device);
+            if (rpiHardwareAddress.contains(deviceHardwareAddress)) {
+                Log.d(TAG, deviceName + " " + deviceHardwareAddress + " added.");
+                pairedBoxBlueDevices.add(device);
+            }
 
         }
 
@@ -48,6 +57,9 @@ public class BoxBlue {
     }
 
     public BoxBlue(BluetoothAdapter bluetoothAdapter, Handler handler) throws BoxBlueDeviceNotFoundException {
+        // add rpi mac ids
+        addRpiMacIds();
+
         mmBluetoothAdapter = bluetoothAdapter;
         mmHandler = handler;
 
