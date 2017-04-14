@@ -8,6 +8,14 @@
 
     <application android:allowBackup="true" android:label="@string/app_name"
         android:supportsRtl="true">
+        <!--<receiver android:name=".connection.BoxBlueClientReceiver" >
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.FOUND" />
+                <action android:name="android.bluetooth.adapter.action.DISCOVERY_STARTED" />
+                <action android:name="android.bluetooth.adapter.action.DISCOVERY_FINISHED" />
+                <action android:name="android.bluetooth.device.action.BOND_STATE_CHANGED"/>
+            </intent-filter>
+        </receiver> -->
 
     </application>
 

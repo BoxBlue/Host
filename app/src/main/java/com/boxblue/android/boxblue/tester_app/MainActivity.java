@@ -42,84 +42,11 @@ public class MainActivity extends AppCompatActivity {
     private Handler mHandler;
     private BluetoothAdapter mBluetoothAdapter;
 
-    // Create a BroadcastReceiver for ACTION_FOUND.
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            Log.d(TAG,"onReceive called");
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Discovery has found a device. Get the BluetoothDevice
-                // object and its info from the Intent.
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                String deviceName = device.getName();
-                String deviceHardwareAddress = device.getAddress(); // MAC address
-                BluetoothDevice mmDevice = device;
-                Log.d(TAG, "name = " + deviceName + ", MAC: " + deviceHardwareAddress);
-                if (deviceName != null && deviceName.equals("raspberrypi")) {
-                    // Connect to the remote device through the socket. This call blocks
-                    // until it succeeds or throws an exception.
-                    Log.d(TAG, "trying to connect to RPI");
-                    boolean isBonding = mmDevice.createBond();
-                    Log.d(TAG,"isBonding?" + isBonding);
-                }
-            }
-            else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                UUID DEFAULT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-                if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
-                    BluetoothSocket mmSocket = null;
-                    try {
-                        mmSocket = device.createRfcommSocketToServiceRecord(DEFAULT_UUID);
-                        Log.d(TAG, "Trying to connect to socket.");
-                        Class<?> clazz = mmSocket.getRemoteDevice().getClass();
-                        Class<?>[] paramTypes = new Class<?>[] {Integer.TYPE};
-                        Method m = clazz.getMethod("createRfcommSocket",paramTypes);
-                        Object[] params = new Object[] {Integer.valueOf(1)} ;
-                        BluetoothSocket fallback = (BluetoothSocket)m.invoke(mmSocket.getRemoteDevice(), params);
-                        Log.d(TAG, "Connected.");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            else {
-                if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                    Log.d(TAG,"STARTED");
-                } else {
-                    Log.d(TAG,"FINISHED");
-                }
-            }
-        }
-    };
+    private BoxBlue boxBlue;
 
     @Override
     protected void onStart() {
         super.onStart();
-        // Register for broadcasts when a device is discovered.
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        registerReceiver(mReceiver, filter);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Don't forget to unregister the ACTION_FOUND receiver.
-        unregisterReceiver(mReceiver);
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-
-        // create button for computing search to boxblue
-        searchButton = (Button) findViewById(R.id.search_button);
-
         // get default bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -137,13 +64,36 @@ public class MainActivity extends AppCompatActivity {
 
             // disable search button temporarily
             searchButton.setEnabled(false);
-        }
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        } else {
+            // initialize handler with context of this activity
+            mHandler = new BoxBlueHandler(this);
+            boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9B:8B:74", "raspberrypi");
+            boxBlue.registerClientReceiver(this);
+            boxBlue.connect();
         }
 
-        // initialize handler with context of this activity
-        mHandler = new BoxBlueHandler(this);
+
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (boxBlue != null) {
+            boxBlue.unRegisterClientReceiver(this);
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+
+        // create button for computing search to boxblue
+        searchButton = (Button) findViewById(R.id.search_button);
+
+
 
         // populate array with random numbers
         for (int i = 0; i < arr_size; i++)
@@ -165,7 +115,10 @@ public class MainActivity extends AppCompatActivity {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 Toast.makeText(MainActivity.this, "Bluetooth is successfully enabled now", Toast.LENGTH_SHORT).show();
-
+                mHandler = new BoxBlueHandler(this);
+                boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9B:8B:74", "raspberrypi");
+                boxBlue.registerClientReceiver(this);
+                boxBlue.connect();
                 // enable search button
                 searchButton.setEnabled(true);
             }
@@ -184,15 +137,15 @@ public class MainActivity extends AppCompatActivity {
     private void search(int[] arr, int key) {
         boolean isDiscovering = mBluetoothAdapter.startDiscovery();
         Log.d(TAG, "isDiscovering? " + isDiscovering);
-        /*
-        BoxBlue boxBlue = null;
+
+
         try {
-            boxBlue = new BoxBlue(mBluetoothAdapter, mHandler);
+            boxBlue.search(arr, key);
         } catch (BoxBlueDeviceNotFoundException e) {
             e.printStackTrace();
             Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-        boxBlue.search(arr, key);
-        */
+
+
     }
 }

@@ -9,11 +9,13 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import com.sp27.capstone.boxblue.connection.BoxBlueClientReceiver;
 import com.sp27.capstone.boxblue.connection.BoxBlueClientThread;
 import com.sp27.capstone.boxblue.constants.BoxBlueDataTransferType;
 import com.sp27.capstone.boxblue.constants.BoxBlueStorageType;
 import com.sp27.capstone.boxblue.exception.BoxBlueDeviceNotFoundException;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -25,6 +27,7 @@ public class BoxBlue {
     private BluetoothAdapter mmBluetoothAdapter;
     private BluetoothDevice mmDevice;
     private Handler mmHandler;
+    private BoxBlueClientReceiver mmBoxBlueClientReceiver;
     public static final String TAG = "BoxBlue";
 
     private final Set<String> rpiHardwareAddress = new HashSet<>();
@@ -32,6 +35,8 @@ public class BoxBlue {
     private void addRpiMacIds() {
         rpiHardwareAddress.add("B8:27:EB:9B:8B:74");
     }
+
+
 
     private Set<BluetoothDevice> getSetOfPairedDevices() {
         return mmBluetoothAdapter.getBondedDevices();
@@ -56,25 +61,18 @@ public class BoxBlue {
         return pairedBoxBlueDevices;
     }
 
-    public BoxBlue(BluetoothAdapter bluetoothAdapter, Handler handler) throws BoxBlueDeviceNotFoundException {
+    public BoxBlue(BluetoothAdapter bluetoothAdapter, Handler handler, String deviceMAC, String deviceName) {
         // add rpi mac ids
         addRpiMacIds();
 
         mmBluetoothAdapter = bluetoothAdapter;
         mmHandler = handler;
-
-        Set<BluetoothDevice> pairedBoxBlueDevices = getSetOfPairedBoxBlueDevices();
-
-        // get the first one
-        if (pairedBoxBlueDevices.size() > 0) {
-            mmDevice = pairedBoxBlueDevices.iterator().next();
-        }
-        else {
-            Log.d(TAG, "No box blue device found");
-            // throw exception so Activity knows
-            throw new BoxBlueDeviceNotFoundException("No box blue device found");
-        }
+        mmBoxBlueClientReceiver = new BoxBlueClientReceiver();
+        mmBoxBlueClientReceiver.setIntendedDeviceMAC(deviceMAC);
+        mmBoxBlueClientReceiver.setIntendedDeviceName(deviceName);
     }
+
+
 
     private void applyHeader(byte[] message, int currentIndex, byte id, byte functionType, byte storageType, byte sequence, byte payloadLength) {
         // Apply magic
@@ -108,7 +106,25 @@ public class BoxBlue {
         return byteBuffer.array();
     }
 
-    public void search(int[] array, int key) {
+    //call in onStart
+    public void registerClientReceiver(final Context context) {
+        context.registerReceiver(mmBoxBlueClientReceiver, mmBoxBlueClientReceiver.getFilter());
+    }
+
+    //call in onStop
+    public void unRegisterClientReceiver(final Context context) {
+        context.unregisterReceiver(mmBoxBlueClientReceiver);
+    }
+
+    public void connect() {
+        try {
+            mmBoxBlueClientReceiver.getSocket().connect();
+        } catch (final IOException e) {
+            Log.e(TAG,e.getMessage());
+        }
+    }
+
+    public void search(int[] array, int key) throws BoxBlueDeviceNotFoundException {
 
         // this is the total payloadArr
         int[] payloadArr = new int[array.length + 2];
@@ -168,15 +184,21 @@ public class BoxBlue {
 
         Log.d(TAG, "message byte array: " + Arrays.toString(totalMessageInBytes));
 
-        // initialize client thread
-        BoxBlueClientThread boxBlueClientThread = new BoxBlueClientThread(mmDevice,
-                BoxBlueDataTransferType.SEARCH,
-                totalMessageInBytes,
-                mmHandler,
-                mmBluetoothAdapter);
+        mmDevice = mmBoxBlueClientReceiver.getDevice();
+        if (mmDevice == null) {
+            throw new BoxBlueDeviceNotFoundException("No device. Make sure to call registerClientReceiver() and then connect() from your BoxBlue instance.");
+        }
+        else {
+            // initialize client thread
+            BoxBlueClientThread boxBlueClientThread = new BoxBlueClientThread(mmDevice,
+                    BoxBlueDataTransferType.SEARCH,
+                    totalMessageInBytes,
+                    mmHandler,
+                    mmBluetoothAdapter);
 
-        // start thread which connects to boxblue and sends the data then reads the data
-        boxBlueClientThread.start();
+            // start thread which connects to boxblue and sends the data then reads the data
+            boxBlueClientThread.start();
+        }
     }
 
     public int[] sort(int[] array) {
