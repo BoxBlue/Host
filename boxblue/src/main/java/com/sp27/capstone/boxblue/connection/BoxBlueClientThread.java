@@ -37,10 +37,10 @@ public class BoxBlueClientThread extends Thread {
                                BoxBlueDataTransferType boxBlueDataTransferType,
                                byte[] bytesToTransfer,
                                Handler handler,
-                               BluetoothAdapter bluetoothAdapter) {
+                               BluetoothAdapter bluetoothAdapter,
+                               BluetoothSocket bluetoothSocket) {
         // Use a temporary object that is later assigned to mmSocket
         // because mmSocket is final.
-        BluetoothSocket tmp = null;
         mmDevice = device;
 
         mmDataTransferType = boxBlueDataTransferType;
@@ -51,34 +51,7 @@ public class BoxBlueClientThread extends Thread {
 
         mmBluetoothAdapter = bluetoothAdapter;
 
-        // Default UUID
-        UUID DEFAULT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
-        try {
-            // Use the UUID of the device that discovered // TODO Maybe need extra device object
-            if (mmDevice != null)
-            {
-                Log.i(TAG, "Device Name: " + mmDevice.getName());
-                Log.i(TAG, "Device UUID: " + mmDevice.getUuids()[0].getUuid());
-                tmp = mmDevice.createRfcommSocketToServiceRecord(mmDevice.getUuids()[0].getUuid());
-
-            }
-            else Log.d(TAG, "Device is null.");
-        }
-        catch (NullPointerException e)
-        {
-            Log.d(TAG, " UUID from device is null, Using Default UUID, Device name: " + device.getName());
-            try {
-                tmp = mmDevice.createRfcommSocketToServiceRecord(DEFAULT_UUID);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-        }
-        catch (IOException e) {
-            Log.e(TAG, "Socket's create() method failed", e);
-        }
-
-        mmSocket = tmp;
+        mmSocket = bluetoothSocket;
     }
 
     public void run() {

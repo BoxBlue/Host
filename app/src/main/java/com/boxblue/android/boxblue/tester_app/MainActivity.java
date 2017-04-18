@@ -135,10 +135,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void search(int[] arr, int key) {
-        boolean isDiscovering = mBluetoothAdapter.startDiscovery();
-        Log.d(TAG, "isDiscovering? " + isDiscovering);
-
-
         try {
             boxBlue.search(arr, key);
         } catch (BoxBlueDeviceNotFoundException e) {

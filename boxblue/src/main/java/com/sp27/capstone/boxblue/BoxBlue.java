@@ -117,10 +117,14 @@ public class BoxBlue {
     }
 
     public void connect() {
-        try {
-            mmBoxBlueClientReceiver.getSocket().connect();
-        } catch (final IOException e) {
-            Log.e(TAG,e.getMessage());
+        if (mmBoxBlueClientReceiver.getSocket() != null) {
+            try {
+                mmBoxBlueClientReceiver.getSocket().connect();
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        } else {
+            mmBluetoothAdapter.startDiscovery();
         }
     }
 
@@ -194,7 +198,9 @@ public class BoxBlue {
                     BoxBlueDataTransferType.SEARCH,
                     totalMessageInBytes,
                     mmHandler,
-                    mmBluetoothAdapter);
+                    mmBluetoothAdapter,
+                    mmBoxBlueClientReceiver.getSocket()
+            );
 
             // start thread which connects to boxblue and sends the data then reads the data
             boxBlueClientThread.start();

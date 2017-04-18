@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
@@ -52,17 +53,21 @@ public class BoxBlueClientReceiver extends BroadcastReceiver {
                 try {
                     mmSocket = device.createRfcommSocketToServiceRecord(DEFAULT_UUID);
                     Log.d(TAG, "Trying to connect to socket.");
-                    final Class<?> clazz = mmSocket.getRemoteDevice().getClass();
-                    final Class<?>[] paramTypes = new Class<?>[] {Integer.TYPE};
-                    final Method m = clazz.getMethod("createRfcommSocket",paramTypes);
-                    final Object[] params = new Object[] {Integer.valueOf(1)} ;
-                    final BluetoothSocket fallback = (BluetoothSocket)m.invoke(mmSocket.getRemoteDevice(), params);
                     if (mmSocket != null) {
-                        mmSocket.connect();
-                    } else {
-                        fallback.connect();
+                        try {
+                            mmSocket.connect();
+                            Log.d(TAG,"regualr connected");
+                        } catch (Exception e) {
+                            final Class<?> clazz = mmSocket.getRemoteDevice().getClass();
+                            final Class<?>[] paramTypes = new Class<?>[] {Integer.TYPE};
+                            final Method m = clazz.getMethod("createRfcommSocket",paramTypes);
+                            final Object[] params = new Object[] {Integer.valueOf(1)} ;
+                            final BluetoothSocket fallback = (BluetoothSocket)m.invoke(mmSocket.getRemoteDevice(), params);
+                            fallback.connect();
+                            Log.d(TAG, "fallback connected");
+                            mmSocket = fallback;
+                        }
                     }
-                    Log.d(TAG, "Connected.");
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }
