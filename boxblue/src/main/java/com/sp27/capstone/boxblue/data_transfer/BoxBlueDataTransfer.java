@@ -11,6 +11,7 @@ import com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * This class will transfer data between the phone and the boxblue device.
@@ -82,6 +83,7 @@ public class BoxBlueDataTransfer {
                 mmOutStream.write(temp_bytes);
                 mmOutStream.flush();
                 offset += 301;
+                Log.d(TAG, "temp array: " + Arrays.toString(temp_bytes));
             }
             // then send out the rest
             if (bytes.length - offset > 0) {
@@ -89,6 +91,7 @@ public class BoxBlueDataTransfer {
                 System.arraycopy(bytes, offset, rest_of_bytes, 0, bytes.length - offset);
                 mmOutStream.write(rest_of_bytes);
                 mmOutStream.flush();
+                Log.d(TAG, "remaining array: " + Arrays.toString(rest_of_bytes));
             }
 
             // Share the sent message with the UI activity.
