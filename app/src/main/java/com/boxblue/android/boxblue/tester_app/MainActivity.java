@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,6 +33,7 @@ import static android.content.ContentValues.TAG;
 public class MainActivity extends AppCompatActivity {
 
     static final int REQUEST_ENABLE_BT = 1; // request code for enabling bluetooth
+    static final int REQUEST_COARSE_LOCATION = 2; // request code for enanbling coarse location
 
     private int arr_size = 100000;
     private int[] arr = new int[arr_size];
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
         // get default bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -55,6 +58,34 @@ public class MainActivity extends AppCompatActivity {
             // Device does not support Bluetooth
             Toast.makeText(this, "This device does not support Bluetooth", Toast.LENGTH_SHORT).show();
             return;
+        }
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
+
+                Toast.makeText(this, "Permission access failed?", Toast.LENGTH_SHORT).show();
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                        REQUEST_COARSE_LOCATION);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
         }
 
         // Enable Bluetooth
@@ -67,9 +98,12 @@ public class MainActivity extends AppCompatActivity {
         } else {
             // initialize handler with context of this activity
             mHandler = new BoxBlueHandler(this);
-            boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9B:8B:74", "raspberrypi");
+            boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9A:6E:5E", "raspberrypi");
+            //boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9B:8B:74", "raspberrypi");
             boxBlue.registerClientReceiver(this);
+            Log.d(TAG, "Starting connection");
             boxBlue.connect();
+            Log.d(TAG, "Connect called");
         }
 
 
@@ -116,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 Toast.makeText(MainActivity.this, "Bluetooth is successfully enabled now", Toast.LENGTH_SHORT).show();
                 mHandler = new BoxBlueHandler(this);
-                boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9B:8B:74", "raspberrypi");
+                boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9A:6E:5E", "raspberrypi");
                 boxBlue.registerClientReceiver(this);
                 boxBlue.connect();
                 // enable search button
@@ -127,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == 1) {
+        if (requestCode == REQUEST_COARSE_LOCATION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG,"WE GOOOODOOODODODOD");
             }

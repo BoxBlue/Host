@@ -34,6 +34,7 @@ public class BoxBlue {
 
     private void addRpiMacIds() {
         rpiHardwareAddress.add("B8:27:EB:9B:8B:74");
+        rpiHardwareAddress.add("B8:27:EB:9A:6E:5E");
     }
 
 
