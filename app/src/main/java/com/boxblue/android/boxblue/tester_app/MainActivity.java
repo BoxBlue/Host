@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,7 @@ import com.sp27.capstone.boxblue.handler.BoxBlueHandler;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static android.content.ContentValues.TAG;
@@ -131,6 +133,11 @@ public class MainActivity extends AppCompatActivity {
             arr[i] = i;
 
 
+        long nanoStart = SystemClock.elapsedRealtimeNanos();
+        Arrays.binarySearch(arr,0);
+        long nanoEnd = SystemClock.elapsedRealtimeNanos();
+        long time = nanoEnd - nanoStart;
+        Log.d("TIME","elapsed for local search = " + time);
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

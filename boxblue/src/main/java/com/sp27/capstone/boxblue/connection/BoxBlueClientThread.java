@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.sp27.capstone.boxblue.constants.BoxBlueDataTransferType;
@@ -119,10 +120,12 @@ public class BoxBlueClientThread extends Thread {
 
     // Helper functions for managing connected socket
     private void writeThenRead(BoxBlueDataTransfer boxBlueDataTransfer) {
+        long nanoStart = SystemClock.elapsedRealtimeNanos();
         write(boxBlueDataTransfer);
         Log.d(TAG, "Post writing");
         read(boxBlueDataTransfer);
-        Log.d(TAG, "Post reading");
+        long nanoEnd = SystemClock.elapsedRealtimeNanos();
+        Log.d("TIME", "Post reading, elapsed for BoxBlue = " + (nanoEnd - nanoStart));
     }
 
     private void read(BoxBlueDataTransfer boxBlueDataTransfer) {

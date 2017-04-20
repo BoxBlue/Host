@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants;
@@ -28,6 +29,8 @@ public class BoxBlueDataTransfer {
     private byte[] mmBuffer; // mmBuffer store for the stream
     private Handler mHandler; // handler that gets info from Bluetooth service
     private static final String TAG = "BoxBlueDataTransfer";
+    long nanoStart;
+    long nanoEnd;
 
     public BoxBlueDataTransfer(BluetoothSocket socket, Handler handler) {
         mmSocket = socket;
@@ -62,6 +65,8 @@ public class BoxBlueDataTransfer {
             try{
                 // Read from the InputStream
                 numBytes = mmInStream.read(mmBuffer);
+                nanoEnd = SystemClock.elapsedRealtimeNanos();
+                Log.d("TIME","elapsed boxblue = " + (nanoEnd - nanoStart));
                 Log.d(TAG,"numBytes = " + numBytes);
                 // Send the obtained bytes to the UI activity.
                 Message readMsg = mHandler.obtainMessage(
@@ -76,6 +81,7 @@ public class BoxBlueDataTransfer {
 
     public void write(byte[][] bytes) {
         try {
+            nanoStart = SystemClock.elapsedRealtimeNanos() / 1000;
             for (int i = 0; i < bytes.length; i++) {
                 mmOutStream.write(bytes[i]);
                 mmOutStream.flush();
