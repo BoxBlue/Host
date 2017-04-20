@@ -79,7 +79,7 @@ public class BoxBlueDataTransfer {
 
             // Share the sent message with the UI activity.
             Message writtenMsg = mHandler.obtainMessage(
-                    BoxBlueMessageConstants.MESSAGE_WRITE, -1, -1, mmBuffer);
+                    BoxBlueMessageConstants.MESSAGE_WRITE, -1, -1, bytes);
             writtenMsg.sendToTarget();
         } catch (IOException e) {
             Log.e(TAG, "Error occurred when sending data", e);

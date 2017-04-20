@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import java.util.Arrays;
+
 import static com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants.MESSAGE_READ;
 import static com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants.MESSAGE_TOAST;
 import static com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants.MESSAGE_WRITE;
@@ -28,6 +30,8 @@ public class BoxBlueHandler extends Handler {
                 byte[] writeBuf = (byte[]) msg.obj;
                 // construct a string from the buffer
                 String writeMessage = new String(writeBuf);
+                Toast.makeText(mCtx, Arrays.toString(writeBuf),
+                        Toast.LENGTH_SHORT).show();
                 //mConversationArrayAdapter.add("Me:  " + writeMessage);
                 break;
             case MESSAGE_READ:

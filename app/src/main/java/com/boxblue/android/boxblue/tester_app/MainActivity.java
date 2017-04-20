@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_ENABLE_BT = 1; // request code for enabling bluetooth
     static final int REQUEST_COARSE_LOCATION = 2; // request code for enanbling coarse location
 
-    private int arr_size = 100000;
+    private int arr_size = 20;
     private int[] arr = new int[arr_size];
     private int key = 0;
 

@@ -77,7 +77,7 @@ public class BoxBlue {
 
     private void applyHeader(byte[] message, int currentIndex, byte id, byte functionType, byte storageType, byte sequence, byte payloadLength) {
         // Apply magic
-        message[currentIndex++] = (byte) R.integer.magic;
+        message[currentIndex++] = (byte) 0xFA;
 
         // Apply ID
         message[currentIndex++] = id;
@@ -188,6 +188,17 @@ public class BoxBlue {
         }
 
         Log.d(TAG, "message byte array: " + Arrays.toString(totalMessageInBytes));
+
+        byte[] messageTemp = new byte[7];
+        messageTemp[0] = (byte) 0xFA;
+        messageTemp[1] = 1;
+        messageTemp[2] = 2;
+        messageTemp[3] = 3;
+        messageTemp[4] = 4;
+        messageTemp[5] = 1;
+        messageTemp[6] = 6;
+
+        Log.d(TAG, "temp message byte array: " + Arrays.toString(messageTemp));
 
         mmDevice = mmBoxBlueClientReceiver.getDevice();
         if (mmDevice == null) {
