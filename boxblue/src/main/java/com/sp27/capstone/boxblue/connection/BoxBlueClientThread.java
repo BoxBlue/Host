@@ -31,11 +31,11 @@ public class BoxBlueClientThread extends Thread {
     private final Handler mmHandler;
     private final BoxBlueDataTransferType mmDataTransferType;
     private final BluetoothAdapter mmBluetoothAdapter;
-    private final byte[] mmBytesToTransfer;
+    private final byte[][] mmBytesToTransfer;
 
     public BoxBlueClientThread(BluetoothDevice device,
                                BoxBlueDataTransferType boxBlueDataTransferType,
-                               byte[] bytesToTransfer,
+                               byte[][] bytesToTransfer,
                                Handler handler,
                                BluetoothAdapter bluetoothAdapter,
                                BluetoothSocket bluetoothSocket) {

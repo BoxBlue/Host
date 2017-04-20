@@ -74,7 +74,6 @@ public class BoxBlue {
     }
 
 
-
     private void applyHeader(byte[] message, int currentIndex, byte id, byte functionType, byte storageType, byte sequence, byte payloadLength) {
         // Apply magic
         message[currentIndex++] = (byte) 0xFA;
@@ -130,64 +129,55 @@ public class BoxBlue {
     }
 
     public void search(int[] array, int key) throws BoxBlueDeviceNotFoundException {
-
         // this is the total payloadArr
-        int[] payloadArr = new int[array.length + 2];
+        int[] payloadArr = new int[array.length + 1];
         // add key
         payloadArr[0] = key;
         // add terminator
-        payloadArr[payloadArr.length - 1] = '\n';
-        // copy array to [1, payloadArr.length - 2]
+        //payloadArr[payloadArr.length - 1] = '\n';
+        // copy array to [1, payloadArr.length - 1]
         System.arraycopy(array, 0, payloadArr, 1, array.length);
 
         // CONSTANTS
         final int numBytesInHeader = 6;
         final int maxPayloadLength = 255;
+        final int maxPacketLength = 301;
 
         // this is the total payload array in bytes
         byte[] totalPayloadInBytes = intArrayToByteArray(payloadArr);
 
         // how many messages should be sent
-        int numMessages = totalPayloadInBytes.length % maxPayloadLength == 0 ? totalPayloadInBytes.length / maxPayloadLength : totalPayloadInBytes.length / maxPayloadLength + 1;
-
-        // total message to be sent in bytes
-        byte[] totalMessageInBytes = new byte[totalPayloadInBytes.length + numBytesInHeader * numMessages];
-
-        // counters
-        int payloadStartIndex = 0, messageStartIndex = 0;
+        // this implementation because if it is a multiple of 255, we want to send an extra packet of size 0
+        int numMessages = totalPayloadInBytes.length / maxPayloadLength + 1;
+        //int numMessages = totalPayloadInBytes.length % maxPayloadLength == 0 ? totalPayloadInBytes.length / maxPayloadLength : totalPayloadInBytes.length / maxPayloadLength + 1;
 
         // choose random id for byte
         byte id = (byte) new Random().nextInt();
 
-        for (int sequence = 0; sequence < numMessages; sequence++) {
+        // TODO try to make total message as 2D array
+        byte[][] totalMessage = new byte[numMessages][];
+        Log.d(TAG, "Number of messages: " + numMessages);
+        for(int i = 0; i < numMessages; i++) {
+            int payloadSize = totalPayloadInBytes.length - i * maxPayloadLength >= maxPayloadLength ? maxPayloadLength : totalPayloadInBytes.length - i * maxPayloadLength;
+            //Log.d(TAG, "Payload size: " + payloadSize);
+            byte[] msg = new byte[payloadSize + numBytesInHeader];
 
-            // size of payload
-            int sizeOfCurrentPayload = totalPayloadInBytes.length - payloadStartIndex >= maxPayloadLength ? maxPayloadLength : totalPayloadInBytes.length - payloadStartIndex;
-
-            //Log.d(TAG, "size of payload: " + sizeOfCurrentPayload);
-
-            // apply header to byte buffer
-            applyHeader(totalMessageInBytes,
-                    messageStartIndex,
+            // apply header
+            applyHeader(msg,
+                    0,
                     id,
                     BoxBlueDataTransferType.SEARCH.getTransferTypeId(),
                     BoxBlueStorageType.NULL.getStorageTypeId(),
-                    (byte) sequence,
-                    (byte) sizeOfCurrentPayload);
+                    (byte) i,
+                    (byte) payloadSize);
 
-            // offset message start index by size of header
-            messageStartIndex += numBytesInHeader;
+            // copy payload at [i * maxPacketLength, i * maxPacketLength + payloadSize] to msg at [6, 6 + payloadSize]
+            System.arraycopy(totalPayloadInBytes, i * maxPayloadLength, msg, numBytesInHeader, payloadSize);
 
-            // copy payload into total message in bytes
-            System.arraycopy(totalPayloadInBytes, payloadStartIndex,
-                    totalMessageInBytes, messageStartIndex, sizeOfCurrentPayload);
+            Log.d(TAG, "message " + i + ": " + Arrays.toString(msg));
 
-            // increment start indices
-            payloadStartIndex += sizeOfCurrentPayload;
-            messageStartIndex += sizeOfCurrentPayload;
+            totalMessage[i] = msg;
         }
-
-        Log.d(TAG, "message byte array: " + Arrays.toString(totalMessageInBytes));
 
         byte[] messageTemp = new byte[7];
         messageTemp[0] = (byte) 0xFA;
@@ -208,7 +198,7 @@ public class BoxBlue {
             // initialize client thread
             BoxBlueClientThread boxBlueClientThread = new BoxBlueClientThread(mmDevice,
                     BoxBlueDataTransferType.SEARCH,
-                    totalMessageInBytes,
+                    totalMessage,
                     mmHandler,
                     mmBluetoothAdapter,
                     mmBoxBlueClientReceiver.getSocket()

@@ -73,25 +73,11 @@ public class BoxBlueDataTransfer {
         }
     }
 
-    public void write(byte[] bytes) {
+    public void write(byte[][] bytes) {
         try {
-            int offset = 0;
-            while (bytes.length - offset >= 301) {
-                byte[] temp_bytes = new byte[301];
-                System.arraycopy(bytes, offset,
-                        temp_bytes, 0, 301);
-                mmOutStream.write(temp_bytes);
+            for (int i = 0; i < bytes.length; i++) {
+                mmOutStream.write(bytes[i]);
                 mmOutStream.flush();
-                offset += 301;
-                Log.d(TAG, "temp array: " + Arrays.toString(temp_bytes));
-            }
-            // then send out the rest
-            if (bytes.length - offset > 0) {
-                byte[] rest_of_bytes = new byte[bytes.length - offset];
-                System.arraycopy(bytes, offset, rest_of_bytes, 0, bytes.length - offset);
-                mmOutStream.write(rest_of_bytes);
-                mmOutStream.flush();
-                Log.d(TAG, "remaining array: " + Arrays.toString(rest_of_bytes));
             }
 
             // Share the sent message with the UI activity.
