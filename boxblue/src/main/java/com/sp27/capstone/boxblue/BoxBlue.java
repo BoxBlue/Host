@@ -98,7 +98,7 @@ public class BoxBlue {
     private byte[] intArrayToByteArray(int[] array) {
         Log.d(TAG, "int array: " + Arrays.toString(array));
 
-        ByteBuffer byteBuffer = ByteBuffer.allocate(array.length * 4 + 1);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(array.length * 4);
         IntBuffer intBuffer = byteBuffer.asIntBuffer();
         intBuffer.put(array);
 
