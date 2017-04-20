@@ -98,21 +98,18 @@ public class MainActivity extends AppCompatActivity {
         } else {
             // initialize handler with context of this activity
             mHandler = new BoxBlueHandler(this);
-            boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9A:6E:5E", "raspberrypi");
-            //boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9B:8B:74", "raspberrypi");
+            //boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9A:6E:5E", "raspberrypi");
+            boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9B:8B:74", "raspberrypi");
             boxBlue.registerClientReceiver(this);
             Log.d(TAG, "Starting connection");
             boxBlue.connect();
             Log.d(TAG, "Connect called");
         }
-
-
-
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
         if (boxBlue != null) {
             boxBlue.unRegisterClientReceiver(this);
         }

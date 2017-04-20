@@ -26,6 +26,9 @@ public class BoxBlueClientReceiver extends BroadcastReceiver {
     private String intendedDeviceName;
     private String intendedDeviceMAC;
 
+    private final UUID DEFAULT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
+
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
@@ -48,29 +51,8 @@ public class BoxBlueClientReceiver extends BroadcastReceiver {
         }
         else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
             final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            final UUID DEFAULT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
             if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
-                try {
-                    mmSocket = device.createRfcommSocketToServiceRecord(DEFAULT_UUID);
-                    Log.d(TAG, "Trying to connect to socket.");
-                    if (mmSocket != null) {
-                        try {
-                            mmSocket.connect();
-                            Log.d(TAG,"regualr connected");
-                        } catch (Exception e) {
-                            final Class<?> clazz = mmSocket.getRemoteDevice().getClass();
-                            final Class<?>[] paramTypes = new Class<?>[] {Integer.TYPE};
-                            final Method m = clazz.getMethod("createRfcommSocket",paramTypes);
-                            final Object[] params = new Object[] {Integer.valueOf(1)} ;
-                            final BluetoothSocket fallback = (BluetoothSocket)m.invoke(mmSocket.getRemoteDevice(), params);
-                            fallback.connect();
-                            Log.d(TAG, "fallback connected");
-                            mmSocket = fallback;
-                        }
-                    }
-                } catch (final Exception e) {
-                    e.printStackTrace();
-                }
+                connectSocket(device);
             }
         }
         else {
@@ -96,6 +78,30 @@ public class BoxBlueClientReceiver extends BroadcastReceiver {
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         return filter;
+    }
+
+    public void connectSocket(BluetoothDevice device) {
+        try {
+            mmSocket = device.createRfcommSocketToServiceRecord(DEFAULT_UUID);
+            Log.d(TAG, "Trying to connect to socket.");
+            if (mmSocket != null) {
+                try {
+                    mmSocket.connect();
+                    Log.d(TAG,"regualr connected");
+                } catch (Exception e) {
+                    final Class<?> clazz = mmSocket.getRemoteDevice().getClass();
+                    final Class<?>[] paramTypes = new Class<?>[] {Integer.TYPE};
+                    final Method m = clazz.getMethod("createRfcommSocket",paramTypes);
+                    final Object[] params = new Object[] {Integer.valueOf(1)} ;
+                    final BluetoothSocket fallback = (BluetoothSocket)m.invoke(mmSocket.getRemoteDevice(), params);
+                    fallback.connect();
+                    Log.d(TAG, "fallback connected");
+                    mmSocket = fallback;
+                }
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public BluetoothSocket getSocket() {

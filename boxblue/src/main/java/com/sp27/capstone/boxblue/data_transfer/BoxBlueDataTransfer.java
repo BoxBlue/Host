@@ -62,12 +62,13 @@ public class BoxBlueDataTransfer {
             try{
                 // Read from the InputStream
                 numBytes = mmInStream.read(mmBuffer);
+                Log.d(TAG,"numBytes = " + numBytes);
                 // Send the obtained bytes to the UI activity.
                 Message readMsg = mHandler.obtainMessage(
                         BoxBlueMessageConstants.MESSAGE_READ, numBytes, -1, mmBuffer);
                 readMsg.sendToTarget();
             } catch (IOException e) {
-                Log.d(TAG, "Input stream was disconnected", e);
+                Log.e(TAG, "Input stream was disconnected", e);
                 break;
             }
         }
@@ -79,11 +80,10 @@ public class BoxBlueDataTransfer {
                 mmOutStream.write(bytes[i]);
                 mmOutStream.flush();
             }
-
             // Share the sent message with the UI activity.
             Message writtenMsg = mHandler.obtainMessage(
                     BoxBlueMessageConstants.MESSAGE_WRITE, -1, -1, bytes);
-            writtenMsg.sendToTarget();
+            //writtenMsg.sendToTarget();
         } catch (IOException e) {
             Log.e(TAG, "Error occurred when sending data", e);
 

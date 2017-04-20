@@ -30,7 +30,10 @@ public class BoxBlue {
     private BoxBlueClientReceiver mmBoxBlueClientReceiver;
     public static final String TAG = "BoxBlue";
 
+
     private final Set<String> rpiHardwareAddress = new HashSet<>();
+    private String rpiAddress;
+    private String rpiName;
 
     private void addRpiMacIds() {
         rpiHardwareAddress.add("B8:27:EB:9B:8B:74");
@@ -71,6 +74,8 @@ public class BoxBlue {
         mmBoxBlueClientReceiver = new BoxBlueClientReceiver();
         mmBoxBlueClientReceiver.setIntendedDeviceMAC(deviceMAC);
         mmBoxBlueClientReceiver.setIntendedDeviceName(deviceName);
+        this.rpiAddress = deviceMAC;
+        this.rpiName = deviceName;
     }
 
 
@@ -124,6 +129,13 @@ public class BoxBlue {
                 Log.e(TAG, e.getMessage());
             }
         } else {
+            for (BluetoothDevice device : mmBluetoothAdapter.getBondedDevices()) {
+                if (device.getName().equals(this.rpiName) || device.getAddress().equals(this.rpiAddress)) {
+                    mmBoxBlueClientReceiver.connectSocket(device);
+                    mmDevice = device;
+                    return;
+                }
+            }
             mmBluetoothAdapter.startDiscovery();
         }
     }
@@ -190,7 +202,7 @@ public class BoxBlue {
 
         Log.d(TAG, "temp message byte array: " + Arrays.toString(messageTemp));
 
-        mmDevice = mmBoxBlueClientReceiver.getDevice();
+        if (mmDevice == null) mmDevice = mmBoxBlueClientReceiver.getDevice();
         if (mmDevice == null) {
             throw new BoxBlueDeviceNotFoundException("No device. Make sure to call registerClientReceiver() and then connect() from your BoxBlue instance.");
         }

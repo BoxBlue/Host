@@ -58,6 +58,7 @@ public class BoxBlueClientThread extends Thread {
         // Cancel discovery because it otherwise slows down the connection.
         mmBluetoothAdapter.cancelDiscovery();
 
+        /*
         try {
             // Connect to the remote device through the socket. This call blocks
             // until it succeeds or throws an exception.
@@ -75,6 +76,7 @@ public class BoxBlueClientThread extends Thread {
             cancel();
             return;
         }
+        */
 
         // The connection attempt succeeded. Perform work associated with
         // the connection in a separate thread.
