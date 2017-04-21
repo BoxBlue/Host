@@ -104,6 +104,7 @@ public class BoxBlueClientThread extends Thread {
                 writeThenRead(boxBlueDataTransfer);
                 break;
             case SORT:
+                Log.d(TAG, "Going to start write then read for sort");
                 writeThenRead(boxBlueDataTransfer);
                 break;
             case RECEIVE_DATA:

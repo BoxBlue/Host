@@ -29,8 +29,8 @@ public class BoxBlueDataTransfer {
     private byte[] mmBuffer; // mmBuffer store for the stream
     private Handler mHandler; // handler that gets info from Bluetooth service
     private static final String TAG = "BoxBlueDataTransfer";
-    long nanoStart;
-    long nanoEnd;
+    long milliStart;
+    long milliEnd;
 
     public BoxBlueDataTransfer(BluetoothSocket socket, Handler handler) {
         mmSocket = socket;
@@ -65,8 +65,11 @@ public class BoxBlueDataTransfer {
             try{
                 // Read from the InputStream
                 numBytes = mmInStream.read(mmBuffer);
-                nanoEnd = SystemClock.elapsedRealtimeNanos();
-                Log.d("TIME","elapsed boxblue = " + (nanoEnd - nanoStart));
+                milliEnd = SystemClock.currentThreadTimeMillis();
+                Log.d("TIME", "boxblue end = " + milliEnd);
+                Log.d("TIME", "boxblue start = " + milliStart);
+                long elapsedTime = milliEnd - milliStart;
+                Log.d("TIME","elapsed boxblue = " + elapsedTime);
                 Log.d(TAG,"numBytes = " + numBytes);
                 // Send the obtained bytes to the UI activity.
                 Message readMsg = mHandler.obtainMessage(
@@ -81,7 +84,8 @@ public class BoxBlueDataTransfer {
 
     public void write(byte[][] bytes) {
         try {
-            nanoStart = SystemClock.elapsedRealtimeNanos() / 1000;
+            milliStart = SystemClock.currentThreadTimeMillis();
+            Log.d("TIME", "boxblue start = " + milliStart);
             for (int i = 0; i < bytes.length; i++) {
                 mmOutStream.write(bytes[i]);
                 mmOutStream.flush();

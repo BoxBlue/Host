@@ -9,8 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -25,10 +28,15 @@ import com.sp27.capstone.boxblue.BoxBlue;
 import com.sp27.capstone.boxblue.exception.BoxBlueDeviceNotFoundException;
 import com.sp27.capstone.boxblue.handler.BoxBlueHandler;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static android.content.ContentValues.TAG;
 
@@ -36,12 +44,14 @@ public class MainActivity extends AppCompatActivity {
 
     static final int REQUEST_ENABLE_BT = 1; // request code for enabling bluetooth
     static final int REQUEST_COARSE_LOCATION = 2; // request code for enanbling coarse location
+    static final int REQUEST_PICTURE = 3; // request code for taking a picture
 
     private int arr_size = 10000;
-    private int[] arr = new int[arr_size];
+    private int[] sorted_arr = new int[arr_size];
+    private int[] unsorted_arr = new int[arr_size];
     private int key = 0;
 
-    private Button searchButton;
+    private Button searchButton, sortButton, pictureButton;
 
     private Handler mHandler;
     private BluetoothAdapter mBluetoothAdapter;
@@ -97,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
 
             // disable search button temporarily
             searchButton.setEnabled(false);
+            sortButton.setEnabled(false);
+            pictureButton.setEnabled(false);
         } else {
             // initialize handler with context of this activity
             mHandler = new BoxBlueHandler(this);
@@ -125,23 +137,42 @@ public class MainActivity extends AppCompatActivity {
 
         // create button for computing search to boxblue
         searchButton = (Button) findViewById(R.id.search_button);
+        sortButton = (Button) findViewById(R.id.sort_button);
+        pictureButton = (Button) findViewById(R.id.picture_button);
+
+        Random rand = new Random();
 
 
-
-        // populate array with random numbers
-        for (int i = 0; i < arr_size; i++)
-            arr[i] = i;
+        // populate sorted array with random numbers
+        for (int i = 0; i < arr_size; i++) {
+            sorted_arr[i] = i;
+            unsorted_arr[i] = rand.nextInt();
+        }
 
 
         long nanoStart = SystemClock.elapsedRealtimeNanos();
-        Arrays.binarySearch(arr,0);
+        Arrays.binarySearch(sorted_arr,0);
         long nanoEnd = SystemClock.elapsedRealtimeNanos();
         long time = nanoEnd - nanoStart;
         Log.d("TIME","elapsed for local search = " + time);
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                search(arr, key);
+                search(sorted_arr, key);
+            }
+        });
+        sortButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sort(unsorted_arr);
+            }
+        });
+        pictureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Take a picture with the phone
+                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(takePicture, REQUEST_PICTURE);
             }
         });
     }
@@ -159,6 +190,20 @@ public class MainActivity extends AppCompatActivity {
                 boxBlue.connect();
                 // enable search button
                 searchButton.setEnabled(true);
+                sortButton.setEnabled(true);
+            }
+        }
+        else if (requestCode == REQUEST_PICTURE) {
+            if (resultCode == RESULT_OK) {
+                Bitmap selectedImage = (Bitmap) data.getExtras().get("data");
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                selectedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byte[] imageInBytes = stream.toByteArray();
+                try {
+                    boxBlue.storeImage(imageInBytes);
+                } catch (BoxBlueDeviceNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -179,7 +224,14 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
 
-
+    private void sort(int[] arr) {
+        try {
+            boxBlue.sort(arr);
+        } catch (BoxBlueDeviceNotFoundException e) {
+            e.printStackTrace();
+            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -30,6 +30,11 @@ public class BoxBlue {
     private BoxBlueClientReceiver mmBoxBlueClientReceiver;
     public static final String TAG = "BoxBlue";
 
+    // CONSTANTS
+    final int numBytesInHeader = 6;
+    final int maxPayloadLength = 255;
+    final int maxPacketLength = 301;
+
 
     private final Set<String> rpiHardwareAddress = new HashSet<>();
     private String rpiAddress;
@@ -150,11 +155,6 @@ public class BoxBlue {
         // copy array to [1, payloadArr.length - 1]
         System.arraycopy(array, 0, payloadArr, 1, array.length);
 
-        // CONSTANTS
-        final int numBytesInHeader = 6;
-        final int maxPayloadLength = 255;
-        final int maxPacketLength = 301;
-
         // this is the total payload array in bytes
         byte[] totalPayloadInBytes = intArrayToByteArray(payloadArr);
 
@@ -221,8 +221,114 @@ public class BoxBlue {
         }
     }
 
-    public int[] sort(int[] array) {
-        return array;
+    public void sort(int[] array)  throws BoxBlueDeviceNotFoundException {
+
+        // this is the total payload array in bytes
+        byte[] totalPayloadInBytes = intArrayToByteArray(array);
+
+        // how many messages should be sent
+        // this implementation because if it is a multiple of 255, we want to send an extra packet of size 0
+        int numMessages = totalPayloadInBytes.length / maxPayloadLength + 1;
+        //int numMessages = totalPayloadInBytes.length % maxPayloadLength == 0 ? totalPayloadInBytes.length / maxPayloadLength : totalPayloadInBytes.length / maxPayloadLength + 1;
+
+        // choose random id for byte
+        byte id = (byte) new Random().nextInt();
+
+        // TODO try to make total message as 2D array
+        byte[][] totalMessage = new byte[numMessages][];
+        Log.d(TAG, "Number of messages: " + numMessages);
+        for(int i = 0; i < numMessages; i++) {
+            int payloadSize = totalPayloadInBytes.length - i * maxPayloadLength >= maxPayloadLength ? maxPayloadLength : totalPayloadInBytes.length - i * maxPayloadLength;
+            //Log.d(TAG, "Payload size: " + payloadSize);
+            byte[] msg = new byte[payloadSize + numBytesInHeader];
+
+            // apply header
+            applyHeader(msg,
+                    0,
+                    id,
+                    BoxBlueDataTransferType.SORT.getTransferTypeId(),
+                    BoxBlueStorageType.NULL.getStorageTypeId(),
+                    (byte) i,
+                    (byte) payloadSize);
+
+            // copy payload at [i * maxPacketLength, i * maxPacketLength + payloadSize] to msg at [6, 6 + payloadSize]
+            System.arraycopy(totalPayloadInBytes, i * maxPayloadLength, msg, numBytesInHeader, payloadSize);
+
+            Log.d(TAG, "message " + i + ": " + Arrays.toString(msg));
+
+            totalMessage[i] = msg;
+        }
+
+        if (mmDevice == null) mmDevice = mmBoxBlueClientReceiver.getDevice();
+        if (mmDevice == null) {
+            throw new BoxBlueDeviceNotFoundException("No device. Make sure to call registerClientReceiver() and then connect() from your BoxBlue instance.");
+        }
+        else {
+            // initialize client thread
+            BoxBlueClientThread boxBlueClientThread = new BoxBlueClientThread(mmDevice,
+                    BoxBlueDataTransferType.SORT,
+                    totalMessage,
+                    mmHandler,
+                    mmBluetoothAdapter,
+                    mmBoxBlueClientReceiver.getSocket()
+            );
+
+            // start thread which connects to boxblue and sends the data then reads the data
+            boxBlueClientThread.start();
+        }
+    }
+
+    public void storeImage(byte[] totalPayloadInBytes) throws BoxBlueDeviceNotFoundException {
+        // how many messages should be sent
+        // this implementation because if it is a multiple of 255, we want to send an extra packet of size 0
+        int numMessages = totalPayloadInBytes.length / maxPayloadLength + 1;
+        //int numMessages = totalPayloadInBytes.length % maxPayloadLength == 0 ? totalPayloadInBytes.length / maxPayloadLength : totalPayloadInBytes.length / maxPayloadLength + 1;
+
+        // choose random id for byte
+        byte id = (byte) new Random().nextInt();
+
+        // TODO try to make total message as 2D array
+        byte[][] totalMessage = new byte[numMessages][];
+        Log.d(TAG, "Number of messages: " + numMessages);
+        for(int i = 0; i < numMessages; i++) {
+            int payloadSize = totalPayloadInBytes.length - i * maxPayloadLength >= maxPayloadLength ? maxPayloadLength : totalPayloadInBytes.length - i * maxPayloadLength;
+            //Log.d(TAG, "Payload size: " + payloadSize);
+            byte[] msg = new byte[payloadSize + numBytesInHeader];
+
+            // apply header
+            applyHeader(msg,
+                    0,
+                    id,
+                    BoxBlueDataTransferType.TRANSFER_DATA.getTransferTypeId(),
+                    BoxBlueStorageType.IMAGE.getStorageTypeId(),
+                    (byte) i,
+                    (byte) payloadSize);
+
+            // copy payload at [i * maxPacketLength, i * maxPacketLength + payloadSize] to msg at [6, 6 + payloadSize]
+            System.arraycopy(totalPayloadInBytes, i * maxPayloadLength, msg, numBytesInHeader, payloadSize);
+
+            Log.d(TAG, "message " + i + ": " + Arrays.toString(msg));
+
+            totalMessage[i] = msg;
+        }
+
+        if (mmDevice == null) mmDevice = mmBoxBlueClientReceiver.getDevice();
+        if (mmDevice == null) {
+            throw new BoxBlueDeviceNotFoundException("No device. Make sure to call registerClientReceiver() and then connect() from your BoxBlue instance.");
+        }
+        else {
+            // initialize client thread
+            BoxBlueClientThread boxBlueClientThread = new BoxBlueClientThread(mmDevice,
+                    BoxBlueDataTransferType.TRANSFER_DATA,
+                    totalMessage,
+                    mmHandler,
+                    mmBluetoothAdapter,
+                    mmBoxBlueClientReceiver.getSocket()
+            );
+
+            // start thread which connects to boxblue and sends the data then reads the data
+            boxBlueClientThread.start();
+        }
     }
 
 
