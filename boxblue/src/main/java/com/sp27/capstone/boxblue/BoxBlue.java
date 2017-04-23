@@ -76,7 +76,7 @@ public class BoxBlue {
 
         mmBluetoothAdapter = bluetoothAdapter;
         mmHandler = handler;
-        mmBoxBlueClientReceiver = new BoxBlueClientReceiver();
+        mmBoxBlueClientReceiver = new BoxBlueClientReceiver(mmHandler);
         mmBoxBlueClientReceiver.setIntendedDeviceMAC(deviceMAC);
         mmBoxBlueClientReceiver.setIntendedDeviceName(deviceName);
         this.rpiAddress = deviceMAC;

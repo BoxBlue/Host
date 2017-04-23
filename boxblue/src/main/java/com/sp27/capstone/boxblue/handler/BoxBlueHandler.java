@@ -3,11 +3,13 @@ package com.sp27.capstone.boxblue.handler;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Arrays;
 
 import static com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants.MESSAGE_READ;
+import static com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants.MESSAGE_STATUS;
 import static com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants.MESSAGE_TOAST;
 import static com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants.MESSAGE_WRITE;
 
@@ -18,9 +20,15 @@ import static com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants.MESSAG
 public class BoxBlueHandler extends Handler {
 
     Context mCtx;
+    TextView mStatusView;
 
     public BoxBlueHandler(Context ctx) {
         mCtx = ctx;
+    }
+
+    public BoxBlueHandler(Context ctx, TextView statusView) {
+        mCtx = ctx;
+        mStatusView = statusView;
     }
 
     @Override
@@ -45,6 +53,15 @@ public class BoxBlueHandler extends Handler {
                 Toast.makeText(mCtx, msg.getData().getString("toast"),
                         Toast.LENGTH_SHORT).show();
                 break;
+            case  MESSAGE_STATUS:
+                if (mStatusView != null) {
+                    int connectionStatus = msg.getData().getInt("connection");
+                    if (connectionStatus == 1) {
+                        mStatusView.setText("Connected");
+                    } else {
+                        mStatusView.setText("Disconnected");
+                    }
+                }
         }
     }
 }

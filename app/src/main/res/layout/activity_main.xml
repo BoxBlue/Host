@@ -25,4 +25,16 @@
         android:id="@+id/picture_button"
         android:text="@string/picture_button"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/status_view"
+        />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/try_connect_btn"
+        android:text="@string/connect_button"
+        />
+
 </LinearLayout>

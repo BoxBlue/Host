@@ -7,7 +7,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
+
+import com.sp27.capstone.boxblue.constants.BoxBlueMessageConstants;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -23,11 +28,15 @@ public class BoxBlueClientReceiver extends BroadcastReceiver {
 
     private BluetoothSocket mmSocket = null;
     private BluetoothDevice mmDevice = null;
+    private Handler mmHandler;
     private String intendedDeviceName;
     private String intendedDeviceMAC;
 
     private final UUID DEFAULT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
+    public  BoxBlueClientReceiver(Handler handler) {
+        mmHandler = handler;
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -55,6 +64,19 @@ public class BoxBlueClientReceiver extends BroadcastReceiver {
                 connectSocket(device);
             }
         }
+        else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+            Message message = mmHandler.obtainMessage(BoxBlueMessageConstants.MESSAGE_STATUS);
+            Bundle bundle = new Bundle();
+            bundle.putInt("connection",1);
+            message.setData(bundle);
+            mmHandler.sendMessage(message);
+        } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+            Message message = mmHandler.obtainMessage(BoxBlueMessageConstants.MESSAGE_STATUS);
+            Bundle bundle = new Bundle();
+            bundle.putInt("connection",0);
+            message.setData(bundle);
+            mmHandler.sendMessage(message);
+        }
         else {
             if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
                 Log.d(TAG,"STARTED");
@@ -77,6 +99,8 @@ public class BoxBlueClientReceiver extends BroadcastReceiver {
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         return filter;
     }
 

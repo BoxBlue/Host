@@ -3,4 +3,5 @@
     <string name="search_button">Search key</string>
     <string name="sort_button">Sort array</string>
     <string name="picture_button">Take a picture and store on BoxBlue</string>
+    <string name="connect_button">Try Connecting</string>
 </resources>

@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.boxblue.android.boxblue.R;
@@ -51,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private int[] unsorted_arr = new int[arr_size];
     private int key = 0;
 
-    private Button searchButton, sortButton, pictureButton;
+    private Button searchButton, sortButton, pictureButton, connectBtn;
+    private TextView connectionStatusView;
 
     private Handler mHandler;
     private BluetoothAdapter mBluetoothAdapter;
@@ -109,9 +111,10 @@ public class MainActivity extends AppCompatActivity {
             searchButton.setEnabled(false);
             sortButton.setEnabled(false);
             pictureButton.setEnabled(false);
+            connectBtn.setEnabled(false);
         } else {
             // initialize handler with context of this activity
-            mHandler = new BoxBlueHandler(this);
+            mHandler = new BoxBlueHandler(this,connectionStatusView);
             //boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9A:6E:5E", "raspberrypi");
             boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9B:8B:74", "raspberrypi");
             boxBlue.registerClientReceiver(this);
@@ -139,6 +142,9 @@ public class MainActivity extends AppCompatActivity {
         searchButton = (Button) findViewById(R.id.search_button);
         sortButton = (Button) findViewById(R.id.sort_button);
         pictureButton = (Button) findViewById(R.id.picture_button);
+        connectBtn = (Button)findViewById(R.id.try_connect_btn);
+        connectionStatusView = (TextView)findViewById(R.id.status_view);
+        connectionStatusView.setText("Disconnected");
 
         Random rand = new Random();
 
@@ -175,6 +181,12 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(takePicture, REQUEST_PICTURE);
             }
         });
+        connectBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boxBlue.connect();
+            }
+        });
     }
 
     @Override
@@ -191,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
                 // enable search button
                 searchButton.setEnabled(true);
                 sortButton.setEnabled(true);
+                connectBtn.setEnabled(true);
             }
         }
         else if (requestCode == REQUEST_PICTURE) {
