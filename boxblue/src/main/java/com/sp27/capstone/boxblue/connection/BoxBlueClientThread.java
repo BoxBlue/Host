@@ -111,7 +111,8 @@ public class BoxBlueClientThread extends Thread {
                 read(boxBlueDataTransfer);
                 break;
             case TRANSFER_DATA:
-                write(boxBlueDataTransfer);
+                Log.d(TAG,"Going to start write then read for transfer");
+                writeThenRead(boxBlueDataTransfer);
                 break;
         }
 
