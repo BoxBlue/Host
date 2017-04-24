@@ -40,6 +40,8 @@ public class BoxBlue {
     private String rpiAddress;
     private String rpiName;
 
+    private boolean isRegistered = false;
+
     private void addRpiMacIds() {
         rpiHardwareAddress.add("B8:27:EB:9B:8B:74");
         rpiHardwareAddress.add("B8:27:EB:9A:6E:5E");
@@ -119,11 +121,13 @@ public class BoxBlue {
     //call in onStart
     public void registerClientReceiver(final Context context) {
         context.registerReceiver(mmBoxBlueClientReceiver, mmBoxBlueClientReceiver.getFilter());
+        isRegistered = true;
     }
 
     //call in onStop
     public void unRegisterClientReceiver(final Context context) {
         context.unregisterReceiver(mmBoxBlueClientReceiver);
+        isRegistered = false;
     }
 
     public void connect() {
@@ -132,6 +136,7 @@ public class BoxBlue {
                 mmBoxBlueClientReceiver.getSocket().connect();
             } catch (IOException e) {
                 Log.e(TAG, e.getMessage());
+                connect();
             }
         } else {
             for (BluetoothDevice device : mmBluetoothAdapter.getBondedDevices()) {
@@ -331,6 +336,9 @@ public class BoxBlue {
         }
     }
 
+    public boolean isRegistered() {
+        return isRegistered;
+    }
 
 
 }

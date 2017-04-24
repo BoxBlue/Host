@@ -117,16 +117,18 @@ public class MainActivity extends AppCompatActivity {
             mHandler = new BoxBlueHandler(this,connectionStatusView);
             //boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9A:6E:5E", "raspberrypi");
             boxBlue = new BoxBlue(mBluetoothAdapter, mHandler, "B8:27:EB:9B:8B:74", "raspberrypi");
-            boxBlue.registerClientReceiver(this);
-            Log.d(TAG, "Starting connection");
-            boxBlue.connect();
-            Log.d(TAG, "Connect called");
+            if (!boxBlue.isRegistered()) {
+                boxBlue.registerClientReceiver(this);
+                Log.d(TAG, "Starting connection");
+                boxBlue.connect();
+                Log.d(TAG, "Connect called");
+            }
         }
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         if (boxBlue != null) {
             boxBlue.unRegisterClientReceiver(this);
         }
