@@ -5,36 +5,83 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:paddingLeft="32dp"
+    android:paddingRight="32dp"
     tools:context="com.boxblue.android.boxblue.tester_app.MainActivity">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/search_button"
-        android:text="@string/search_button"/>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/sort_button"
-        android:text="@string/sort_button"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/search_button"
+            android:textColor="@color/colorText"
+            android:background="@color/colorAccent"
+            android:layout_centerInParent="true"
+            android:text="@string/search_button"/>
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/picture_button"
-        android:text="@string/picture_button"/>
+    </RelativeLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/status_view"
-        />
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/try_connect_btn"
-        android:text="@string/connect_button"
-        />
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorText"
+            android:id="@+id/sort_button"
+            android:background="@color/colorAccent"
+            android:layout_centerInParent="true"
+            android:text="@string/sort_button"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/picture_button"
+            android:textColor="@color/colorText"
+            android:background="@color/colorAccent"
+            android:layout_centerInParent="true"
+            android:text="@string/picture_button"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorText"
+            android:layout_above="@id/try_connect_btn"
+            android:id="@+id/status_view"
+            />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/try_connect_btn"
+            android:textColor="@color/colorText"
+            android:background="@color/colorAccent"
+            android:layout_centerInParent="true"
+            android:text="@string/connect_button"
+            />
+
+    </RelativeLayout>
 
 </LinearLayout>
